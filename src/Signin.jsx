@@ -4,10 +4,11 @@ import TextField from '@mui/material/TextField';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography'
 import Navbar from './navBar';
-
+import { useNavigate } from 'react-router-dom';
 
 function Signin({setUser}){
 
+     const navigate = useNavigate();
    const  [username ,setUsername]  = React.useState(" ")
    const  [password ,setpassword]  = React.useState(" ")
 
@@ -75,6 +76,8 @@ function loginUser(){
             localStorage.clear();  
             localStorage.setItem("key", res.token);
             setUser('doneee')
+            navigate('/courses');
+            // console.log(res,'helooo'
          }
           })})
           }

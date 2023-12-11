@@ -3,15 +3,16 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography'
-import { json } from 'react-router-dom';
-import Navbar from './navBar';
-import Alert from '@mui/material/Alert';
-import Stack from '@mui/material/Stack';
-
+import { useNavigate } from 'react-router-dom';
 
 function Signup({setUser}){
 
- return <div>
+   const navigate= useNavigate();
+   const [username,setUsername] =  React.useState(" ");
+   const [password,setPassword]  = React.useState(" ");
+
+
+  return <div>
   <div style={{paddingTop: 100, marginBottom: 20,  display: "flex", justifyContent: "center"}}>
      <Typography variant="h6" color="initial">Welcome to  coursera</Typography>
   </div>
@@ -22,6 +23,8 @@ function Signup({setUser}){
  <Card variant={"outlined"}  style={{width: 400, padding:20}}>
     <label></label>
     <TextField 
+    value={username}
+    onChange={(e)=>{setUsername(e.target.value)}}
     fullWidth = {true}
     id="name" 
     label="Email" 
@@ -31,6 +34,8 @@ function Signup({setUser}){
     <label></label>
     <TextField required={true}
     fullWidth = {true}
+    value={password}
+    onChange={(e)=>{setPassword(e.target.value)}}
     id="password" 
     label="Password" 
     variant="outlined"
@@ -44,42 +49,41 @@ function Signup({setUser}){
   </Card>
   </div>
  </div>
+
+
+function createUser(){
+
+   if(!username || !password)  alert('please fill all the details')
+
+   else{
+     fetch('http://localhost:3000/admin/signup',{
+        method: "POST",
+        headers: {
+         "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+           "username": username,
+           "password": password
+        })
+   }).then((responce)=>{responce.json().then((res)=>{
+   console.log(res.token);
+ 
+  if(!res.token) alert('admin alreaady exist');
+  else{
+     localStorage.clear();  
+     localStorage.setItem("key", res.token);
+    setUser('donee')
+     navigate("/add")
+  }
+   })})
+   }
+
+}
 }
 
 
 
-async function createUser(){
-//     const name = console.log();
-//     const password = console.log(document.getElementById('password').value);
-      const username  = document.getElementById('name').value;
-      const password  = document.getElementById('password').value;
-
-       if(!username || !password)  alert('please fill allthe details')
-
-       else{
-         fetch('http://localhost:3000/admin/signup',{
-            method: "POST",
-            headers: {
-             "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-               "username": username,
-               "password": password
-            })
-       }).then((responce)=>{responce.json().then((res)=>{
-       console.log(res.token);
-     
-      if(!res.token) alert('admin alreaady exist');
-      else{
-         localStorage.clear();  
-         localStorage.setItem("key", res.token);
-         setUser('doneee')
-      }
-       })})
-       }
-
-
-}
+ 
 
 
 
