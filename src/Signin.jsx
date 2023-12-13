@@ -5,9 +5,12 @@ import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography'
 import Navbar from './navBar';
 import { useNavigate } from 'react-router-dom';
+import { useSetRecoilState } from 'recoil';
+import { userState } from './components/store/user';
 
-function Signin({setUser}){
+function Signin(){
 
+     const setUser = useSetRecoilState(userState);
      const navigate = useNavigate();
    const  [username ,setUsername]  = React.useState(" ")
    const  [password ,setpassword]  = React.useState(" ")
@@ -75,7 +78,10 @@ function loginUser(){
          else{
             localStorage.clear();  
             localStorage.setItem("key", res.token);
-            setUser('doneee')
+            setUser({
+               isLoading: false,
+               userEmail: "donee"
+            })
             navigate('/courses');
             // console.log(res,'helooo'
          }

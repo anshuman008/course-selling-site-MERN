@@ -3,12 +3,15 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import { Link } from 'react-router-dom';
 import { Grid } from "@mui/material";
-const HomePage = ({username}) => {
+import { useRecoilValue } from 'recoil';
+import { userEmailState } from './components/selectors/userEmail';
+const HomePage = () => {
 
+    const userEmail = useRecoilValue(userEmailState)
     return (
         <div style={{ display:"flex",justifyContent:"space-around",alignItems:"center" }}>
 
-           {!username && <div>
+           {!userEmail && <div>
                 <Typography variant="h3" color="initial">Coursera Admin</Typography>
                 <Typography variant="body1" color="initial">A plaace to learn,earn and grow</Typography>
                 <Link  to={"/login"}>
@@ -25,8 +28,8 @@ const HomePage = ({username}) => {
                 
             </div>}
   
-            {username && <div>
-                <Typography variant="h3" color="initial">Welcome back: {username}</Typography>
+            {userEmail && <div>
+                <Typography variant="h3" color="initial">Welcome back: {userEmail}</Typography>
             </div>}
 
             <img width={"800px"} src="https://blogassets.leverageedu.com/blog/wp-content/uploads/2019/12/23174144/assistant-professor.png" alt="" />

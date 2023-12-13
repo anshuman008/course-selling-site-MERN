@@ -4,95 +4,103 @@ import { Card, Typography, Container, Grid } from "@mui/material";
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Courses from "./Courses";
+import axios from "axios";
+
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { courseState } from "./components/store/course";
+import { courseDescription, courseImage, courseTitile,isCourseLoading,courseDetail,coursPrice } from "./components/selectors/user";
+
 
 function Course(){
 
+    const setCourse = useSetRecoilState(courseState);
+    const isLoading = useRecoilValue(isCourseLoading);
     let {courseId} = useParams();
 
-    const[courses,  setCourses] = useState([]);
+  
+
 
     useEffect(()=>{
-        fetch('http://localhost:3000/admin/courses',{
+        fetch(`http://localhost:3000/admin/course/${courseId}`,{
             method: "GET",
             headers: {
                 "key": localStorage.getItem("key")
             }
         }).then((responce)=>{responce.json().then((data)=>{
-            setCourses(data.Courses);
+          
+            setCourse({
+                isLoading: false,
+                course: data.course
+            })
         })})
     },[])
 
-
-    let course  = null;
+    
 
     
-    for(let i = 0; i<courses.length; i++){
-        if(courseId  === courses[i]._id) course = courses[i];
-    }
-
+// console.log(course,'llll');
     
-    if(!course){
+    if(isLoading){
         return <div>
             Loading....
         </div>
     }
     return <div>
 
-     <Graytooper title={course.title}/>
+     <Graytooper />
      <Grid container>
-     <Grid item lg={8}  md={12} sm={12}> <UpdateCard courses={courses} course={course} setCourses={setCourses}/></Grid>
-     <Grid item lg={4} md={12} sm={12}><CardCourse course={course}/></Grid>
+     <Grid item lg={8}  md={12} sm={12}> <UpdateCard/></Grid>
+     <Grid item lg={4} md={12} sm={12}><CardCourse /></Grid>
      </Grid>
-  
-
+   
     </div>
 }
 
-function Graytooper({title}){
+function Graytooper(){
+const title = useRecoilValue(courseTitile);
+
     return <div style={{height:"200px",background:"#212121",zIndex:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
         <Typography variant="h3" color="initial" style={{color:"white",fontWeight:600}}>{title}</Typography>
     </div>
     }
     
 
-function CardCourse(props){
+function CardCourse(){
+    const title = useRecoilValue(courseTitile);
+    const description = useRecoilValue(courseDescription);
+    const image = useRecoilValue(courseImage)
+
+    console.log(title,description,image,'kkkkk')
  return <Card style={{margin:  10, width: 300, minHeight: 200,padding:10}}>
 
- <Typography textAlign={"center"} variant="body1" color="initial"> {props.course.title}</Typography>
- <Typography textAlign={"center"} variant="body1" color="initial"> {props.course.description}</Typography>
- <img src={props.course.imageLink} style={{width:300}}></img>
+ <Typography textAlign={"center"} variant="body1" color="initial"> {title}</Typography>
+ <Typography textAlign={"center"} variant="body1" color="initial"> {description}</Typography>
+ <img src={image} style={{width:300}}></img>
  
  </Card>
 }
 
 
 
-function UpdateCard(props){
+function UpdateCard(){
 
-console.log(props,'lllll')
-    const [courseDetails, setDetails] = useState({
-        title: props.course.title,
-        description: props.course.description,
-        price:  props.course.price,
-        imageLink: props.course.imageLink
-    });
+  const [courseDetails, setCourse] = useRecoilState(courseState);
 
+    const [title, setTitle] = useState(courseDetails.course.title);
+    const [description, setDescription] = useState(courseDetails.course.description);
+    const [image, setImage] = useState(courseDetails.course.imageLink);
+    const [price, setPrice] = useState(courseDetails.course.price);
 
-    const handlechance = (e) =>{
-        const fieldName = e.target.id;
-        const value = e.target.value;
-  
-      setDetails({...courseDetails,[fieldName]:value})
-        //   console.log(courseDetails);
-    }
+    const setCourse0 = useSetRecoilState(courseState);
+
 
   return <Card variant={"outlined"}  style={{width: 400, padding:20, margin:"auto",zIndex:1}}>
     
   <TextField 
-  value={courseDetails.title}
+  value={title}
   fullWidth = {true}
   id="title" 
- onChange={handlechance}
+ onChange={(e)=>{setTitle(e.target.value)}}
  autoComplete='off'
   label="title" 
   variant="outlined"
@@ -100,10 +108,10 @@ console.log(props,'lllll')
   <br/>
 
   <TextField 
-   value={courseDetails.description}
+   value={description}
   fullWidth = {true}
   id="description" 
-  onChange={handlechance}
+  onChange={(e)=>{setDescription(e.target.value)}}
   autoComplete='off'
   label="description" 
   variant="outlined"
@@ -111,63 +119,51 @@ console.log(props,'lllll')
    <br/>
 
    <TextField 
-    value={courseDetails.price}
+    value={price}
   fullWidth = {true}
   id="price" 
-  onChange={handlechance}
+  onChange={(e)=>{setPrice(e.target.value)}}
   autoComplete='off'
   label="price" 
   variant="outlined"
    />
   <br/>
   <TextField 
-   value={courseDetails.imageLink}
+   value={image}
   fullWidth = {true}
   id="imageLink" 
-  onChange={handlechance}
+  onChange={(e)=>{setImage(e.target.value)}}
   autoComplete='off'
   label="image Link" 
   variant="outlined"
    />
   <br/>
-  <Button variant="contained" onClick={()=>{
+  <Button
+                variant="contained"
+                onClick={async () => {
+                    axios.put(`http://localhost:3000/admin/courses/` + courseDetails.course._id, {
+                        title: title,
+                        description: description,
+                        imageLink: image,
+                        published: true,
+                        price:price
+                    }, {
+                        headers: {
+                            "Content-type": "application/json",
+                            "key": localStorage.getItem("key")
+                        }
+                    });
+                    let updatedCourse = {
+                        _id: courseDetails.course._id,
+                        title: title,
+                        description: description,
+                        imageLink: image,
+                        price:price
+                    };
+                    setCourse({course: updatedCourse, isLoading: false});
+                }}
+            > Update course</Button>
 
-      fetch('http://localhost:3000/admin/courses/'+props.course._id,{
-          method:  "PUT",
-          headers: {
-              "Content-Type": "application/json",
-              "key": localStorage.getItem("key")
-          },
-          body: JSON.stringify(courseDetails)
-
-      }).then((responce)=>{responce.json().then((data)=>{
-
-       
-        //   if(data.message) alert(data.message)
-
-          let updatedCourse =  [];
-     
-
-          for(let i = 0;  i<props.courses.length; i++){
-                if(props.courses[i]._id === props.course._id){
-                    updatedCourse.push({
-                        _id: props.course._id,
-                        title:  courseDetails.title,
-                        description: courseDetails.description,
-                        padding: courseDetails.price,
-                        imageLink: courseDetails.imageLink,
-                    })
-                }
-                else{
-                    updatedCourse.push(props.courses[i]);
-                }
-          }
-
-        
-          props.setCourses(updatedCourse);
-         
-      })})
-  }}>Update</Button>
 
 </Card>
 }

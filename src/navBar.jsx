@@ -2,12 +2,24 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useSetRecoilState } from 'recoil';
+import { isUserLoading } from './components/selectors/isUserLoading';
+import { userEmailState } from './components/selectors/userEmail';
+import { userState } from './components/store/user';
+import { useRecoilValue } from 'recoil';
 
 
-
-function Navbar({username,setUser}) {
+function Navbar() {
   
-    if(username){
+    const userLoading = useRecoilValue(isUserLoading);
+    const userEmail = useRecoilValue(userEmailState);
+    const setUser = useSetRecoilState(userState);
+    
+    // console.log(userEmail,'uer haiuyah')
+
+   
+    if(userEmail){
+        console.log(userEmail,'uer haiuyah')
         return <div style={{ display: 'flex', alignItems: "center", justifyContent: "space-between" }}>
         <div>
             <Typography variant="h5" color="initial" style={{ margin: "10px" }}>Coursera</Typography>
@@ -26,7 +38,10 @@ function Navbar({username,setUser}) {
 
             <Button variant="contained" style={{ margin: "10px" }} onClick={ ()=> {
               localStorage.setItem("key",null);
-             setUser(null);
+              setUser({
+                isLoading: false,
+                userEmail: null
+              })
             }
             }>LOGOUT</Button>
         </div>
@@ -45,5 +60,6 @@ function Navbar({username,setUser}) {
 
     </div>
 }
+
 
 export default Navbar;
